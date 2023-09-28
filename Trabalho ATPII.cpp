@@ -51,7 +51,7 @@ void Moldura(int CI,int LI,int CF,int LF,int CorT,int CorF)
 {
 	int i;
 	
-	textcolor(1);
+	textcolor(13);
 	textbackground(15);
 	
 	gotoxy(CI,LI);
@@ -310,11 +310,22 @@ int ConfirmaAlt(void)
 		return 0;
 }
 
-int BuscaCodForn(tpFornecedores Tab[TF], int TLP, int Cod)
+int BuscaCodForn(tpFornecedores Tab[TF], int TLF, int Cod)
 {
 	int pos=0;
 	
-	while(pos<TLP && Cod != Tab[pos].CodForn)
+	while(pos<TLF && Cod!=Tab[pos].CodForn)
+		pos++;
+	if(pos<TLF)
+		return pos;
+	else
+		return -1;
+}
+
+int BuscaCodProd(tpProdutos TabProd[TF],int TLP,int Cod)
+{
+	int pos=0;
+	while(pos<TLP && Cod!=TabProd[pos].CodProd)
 		pos++;
 	if(pos<TLP)
 		return pos;
@@ -355,6 +366,10 @@ void CadForn(tpFornecedores Tab[TF],int &TL_Forn)
 	}
 	else
 	{
+		textcolor(9);
+		gotoxy(3,9);
+		printf("[A] Cadastro:");
+		textcolor(0);
 		InicioTela(C,L);
 		printf("Cadastro de Fornecedores");
 		gotoxy(31,9);
@@ -428,6 +443,214 @@ void CadForn(tpFornecedores Tab[TF],int &TL_Forn)
 	}
 }
 
+void CadProd(tpProdutos TabProd[TF],int &TLP,tpFornecedores TabForn[TF],int TLF)
+{
+	int Cod,CodForn,posForn,pos,C,L;
+	char op;
+	
+	if(TLP==TF)
+	{
+		EscrMsg();
+		printf("Nao Ha Espaco Para Cadastro");
+		getch();
+		LimpaMsg();
+	}
+	else
+	if(TLF!=0)
+	{
+		textcolor(9);
+		gotoxy(3,9);
+		printf("[A] Cadastro:");
+		textcolor(0);
+		InicioTela(C,L);
+		printf("Cadastro de Produtos");
+		L+=2;
+		gotoxy(C,L);
+		printf("Codigo do Produto:");
+		L++;
+		LimpaMsg();
+		LimpaEntrada();
+		ValidaCod(Cod);
+		while(TLP<TF && Cod!=0)
+		{
+			pos=BuscaCodProd(TabProd,TLP,Cod);
+			if(pos==-1)
+			{
+				TabProd[TLP].CodProd = Cod;
+				gotoxy(C,L);
+				printf("Codigo do Fornecedor:");
+				L++;
+				do
+				{
+					LimpaMsg();
+					LimpaEntrada();
+					ValidaCod(CodForn);
+					posForn=BuscaCodForn(TabForn,TLF,CodForn);
+					if(posForn==-1)
+					{
+						EscrMsg();
+						printf("Fornecedor Nao Encontrado");
+						LimpaEntrada();
+						getch();
+						EscrMsg();
+					}
+					else
+					{
+						EscrMsg();
+						printf("Confirma Fornecedor (S/N): %s",TabForn[posForn].NomeForn);
+						LimpaEntrada();
+						fflush(stdin);
+						if(toupper(getch())=='S')
+						{
+							TabProd[TLP].CodForn = TabForn[posForn].CodForn;
+							op='S';
+						}
+					}
+				}while(op!='S');
+				gotoxy(C,L);
+				printf("Descricao do Produto: ");
+				L++;
+				LimpaEntrada();
+				strcpy(TabProd[TLP].Descr,ValidaString());
+				gotoxy(C,L);
+				printf("Quantidade em Estoque:");
+				L++;
+				LimpaEntrada();
+				scanf("%d",&TabProd[TLP].Estoque);
+				gotoxy(C,L);
+				printf("Preco:");
+				L++;
+				LimpaEntrada();
+				scanf("%f",&TabProd[TLP].Preco);
+				gotoxy(C,L);
+				printf("Data de Validade:");
+				L++;
+				LimpaEntrada();
+				scanf("%d %d %d",&TabProd[TLP].DtValidade.d,&TabProd[TLP].DtValidade.m,&TabProd[TLP].DtValidade.a);
+				TLP++;
+				EscrMsg();
+				printf("Produto Cadastrado com Sucesso!");
+				LimpaEntrada();
+				getch();
+			}
+			else
+			{
+				EscrMsg();
+				printf("Produto Ja Cadastrado!");
+				getch();
+				LimpaMsg();
+			}
+			EscrMsg();
+			printf("Realizar Novo Cadastro (S/N)?");
+			LimpaEntrada();
+			if(toupper(getche())=='S')
+			{
+				if(TLP<TF)
+				{
+					InicioTela(C,L);
+					printf("Cadastro de Produtos");
+					gotoxy(C,L);
+					L+=2;
+					gotoxy(C,L);
+					printf("Codigo do Produto: ");
+					L++;
+					LimpaMsg();
+					LimpaEntrada();
+					ValidaCod(Cod);
+				}
+				else
+				{
+					LimpaTela();
+					EscrMsg();
+					printf("Nao Ha Espaco Para Cadastro");
+					LimpaEntrada();
+					getch();
+					LimpaMsg();
+				}
+			}
+			else
+			{
+				EscrMsg();
+				printf("Menu de Cadastro Encerrado!");
+					LimpaEntrada();
+				Cod=0;
+			}
+		}
+		LimpaTela();
+		MenuProduto();
+		LimpaEntrada();
+	}
+	else
+	{
+		EscrMsg();
+		printf("Nenhum Fornecedor Cadastrado");
+		LimpaEntrada();
+		getch();
+		LimpaMsg();
+	}
+}
+
+void ConsultaForn(tpFornecedores Tab[TF], int TLF)
+{
+	int i,C,L,Cod,pos;
+	
+	if(TLF==0)
+	{
+		EscrMsg();
+		printf("Nao Existem Fornecedores Cadastrados!");
+		LimpaEntrada();
+		getch();
+		LimpaMsg();
+	}
+	else
+	{
+		textcolor(9);
+		gotoxy(3,10);
+		printf("[B] Consulta:");
+		textcolor(0);
+		InicioTela(C,L);
+		printf("Consulta de Fornecedores");
+		gotoxy(31,9);
+		printf("Codigo do Fornecedor: ");
+		LimpaMsg();
+		LimpaEntrada();
+		ValidaCod(Cod);
+		while(TLF<TF && Cod!=0)
+		{
+			pos=BuscaCodForn(Tab,TLF,Cod);
+			if(pos==-1)
+			{
+				EscrMsg();
+				printf("Fornecedor Nao Encontrado");
+				LimpaEntrada();
+				getch();
+				LimpaMsg();
+			}
+			else
+			{
+				InicioTela(C,L);
+				gotoxy(C,L);
+				printf("Codigo: %d",Tab[pos].CodForn);
+				L++;
+				gotoxy(C,L);
+				printf("Nome: %s",Tab[pos].NomeForn);
+				L++;
+				gotoxy(C,L);
+				printf("Cidade: %s",Tab[pos].Cidade);
+				L+=2;
+				getch();
+			}
+			InicioTela(C,L);
+			printf("Cadastro de Fornecedores");
+			gotoxy(31,9);
+			printf("Codigo do Fornecedor: ");
+			LimpaMsg();
+			LimpaEntrada();
+			ValidaCod(Cod);
+		}
+	}
+}
+
 void RelatorioForn(tpFornecedores Tab[TF], int TL)
 {
 	int i,l=7,c=31,pg=1;
@@ -442,6 +665,10 @@ void RelatorioForn(tpFornecedores Tab[TF], int TL)
 	}
 	else
 	{
+		textcolor(9);
+		gotoxy(3,13);
+		printf("[E] Relatorio");
+		textcolor(0);
 		LimpaTela();
 		gotoxy(50,6);
 		printf("Relatorio de Fornecedores");
@@ -480,6 +707,70 @@ void RelatorioForn(tpFornecedores Tab[TF], int TL)
 	}
 }
 
+void RelatorioProd(tpProdutos TabProd[TF],int TLP,tpFornecedores TabForn[TF],int TLF)
+{
+	int i,l=7,c=31,pg=1,pos;
+	
+	if(TLP==0)
+	{
+		EscrMsg();
+		printf("Nao Existem Produtos Cadastrados!");
+		getch();
+		LimpaMsg();
+		LimpaEntrada();
+	}
+	else
+	{
+		textcolor(9);
+		gotoxy(3,13);
+		printf("[E] Relatorio");
+		textcolor(0);
+		LimpaTela();
+		gotoxy(50,6);
+		printf("Relatorio de Produtos");
+		for(i=0;i<TLP;i++)
+		{
+				gotoxy(c,l);
+				printf("Codigo: %d",TabProd[i].CodProd);
+				l++;
+				gotoxy(c,l);
+				printf("Descricao: %s",TabProd[i].Descr);
+				l++;
+				gotoxy(c,l);
+				pos=BuscaCodForn(TabForn,TLF,TabProd[i].CodForn);
+				printf("Fornecedor [%d] - %s",TabProd[i].CodForn,TabForn[pos].NomeForn);
+				l++;
+				gotoxy(c,l);
+				printf("Estoque: %d   -   ",TabProd[i].Estoque);
+				printf("Preco: %.2f",TabProd[i].Preco);
+				l++;
+				gotoxy(c,l);
+				printf("Validade: %d/%d/%d",TabProd[i].DtValidade.d,TabProd[i].DtValidade.m,TabProd[i].DtValidade.a);
+				l+=2;
+				if((i+1)%2==0)
+				{
+					
+					gotoxy(68,17);
+					printf("Pagina: %d",pg);
+					getch();
+					pg++;
+					LimpaTela();
+					gotoxy(50,6);
+					printf("Relatorio de Produtos");
+					l=7;
+				}
+		}
+		if(i%2!=0)
+		{
+			gotoxy(68,17);
+			printf("Pagina: %d",pg);
+			getch();
+		}
+		LimpaEntrada();
+		MenuProduto();
+	}
+}
+
 void ExcForn(tpFornecedores Tab[TF],int &TL)
 {
 	int Cod,pos,i,C,L;
@@ -494,6 +785,10 @@ void ExcForn(tpFornecedores Tab[TF],int &TL)
 	}
 	else
 	{
+		textcolor(9);
+		gotoxy(3,11);
+		printf("[C] Exclusao");
+		textcolor(0);
 		InicioTela(C,L);
 		printf("Exclusao de Fornecedores");
 		L+=2;
@@ -577,6 +872,11 @@ void AltForn(tpFornecedores Tab[TF],int TL)
 	}
 	else
 	{
+		textcolor(9);
+		gotoxy(3,12);
+		printf("[D] Alteracao");
+		gotoxy(3,13);
+		textcolor(0);
 		InicioTela(C,L);
 		printf("Alteracao de Fornecedores");
 		gotoxy(C,L);
@@ -766,8 +1066,9 @@ int VerMenuP(int op)
 
 int main(void)
 {
+	tpProdutos TabProd[TF];
 	tpFornecedores TabForn[TF];
-	int TL=0,CI=1,LI=1,CF=80,LF=20,CorT=15,CorF=1,TLForn=0,C,L,VerMenu;
+	int TL=0,CI=1,LI=1,CF=80,LF=20,CorT=15,CorF=1,TLForn=0,TLProd=0,C,L,VerMenu;
 	char op;
 	
 	do
@@ -791,6 +1092,7 @@ int main(void)
 							switch(op)
 							{
 								case 'A':
+									CadProd(TabProd,TLProd,TabForn,TLForn);
 									break;
 								case 'B':
 									break;
@@ -799,6 +1101,7 @@ int main(void)
 								case 'D':
 									break;
 								case 'E':
+									RelatorioProd(TabProd,TLProd,TabForn,TLForn);
 									break;
 							}
 					}while(op!='R');
@@ -817,6 +1120,7 @@ int main(void)
 									CadForn(TabForn,TLForn);
 									break;
 								case 'B':
+									ConsultaForn(TabForn,TLForn);
 									break;
 								case 'C':
 									ExcForn(TabForn,TLForn);
