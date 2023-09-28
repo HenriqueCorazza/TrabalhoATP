@@ -257,7 +257,7 @@ char Menu(void)
 	Preenche();
 	Moldura(1,1,80,25,1,15);
 	gotoxy(24,3);
-	printf("# # #  S U P E R M E R C A D O   # # #");
+	printf("# # #  T R A B A L H O   A T P  # # #");
 	Moldura(2,2,79,4,1,15);
 	Moldura(2,5,27,21,1,15);
 	Moldura(2,22,79,24,1,15);
@@ -505,6 +505,7 @@ void CadProd(tpProdutos TabProd[TF],int &TLP,tpFornecedores TabForn[TF],int TLF)
 							TabProd[TLP].CodForn = TabForn[posForn].CodForn;
 							op='S';
 						}
+						LimpaMsg();
 					}
 				}while(op!='S');
 				gotoxy(C,L);
@@ -742,7 +743,7 @@ void RelatorioProd(tpProdutos TabProd[TF],int TLP,tpFornecedores TabForn[TF],int
 				l++;
 				gotoxy(c,l);
 				printf("Estoque: %d   -   ",TabProd[i].Estoque);
-				printf("Preco: %.2f",TabProd[i].Preco);
+				printf("Preco: R$ %.2f",TabProd[i].Preco);
 				l++;
 				gotoxy(c,l);
 				printf("Validade: %d/%d/%d",TabProd[i].DtValidade.d,TabProd[i].DtValidade.m,TabProd[i].DtValidade.a);
@@ -875,7 +876,6 @@ void AltForn(tpFornecedores Tab[TF],int TL)
 		textcolor(9);
 		gotoxy(3,12);
 		printf("[D] Alteracao");
-		gotoxy(3,13);
 		textcolor(0);
 		InicioTela(C,L);
 		printf("Alteracao de Fornecedores");
@@ -1014,11 +1014,14 @@ void AltForn(tpFornecedores Tab[TF],int TL)
 									printf("Operacao Cancelada");
 							break;
 					}
-					EscrMsg();
-					printf("Realizar Nova Alteracao (S/N)?");
-					LimpaEntrada();
-					if(toupper(getch())!='S')
-						op='R';
+					if(op!='R')
+					{
+						EscrMsg();
+						printf("Realizar Nova Alteracao (S/N)?");
+						LimpaEntrada();
+						if(toupper(getch())!='S')
+							op='R';
+					}
 				}while(op!='R');
 			}
 			EscrMsg();
